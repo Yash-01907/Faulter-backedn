@@ -1,0 +1,84 @@
+{
+  "nodes": [
+    {
+      "id": "motor-1",
+      "type": "motor",
+      "position": { "x": 100, "y": 100 },
+      "data": {
+        "label": "Ink Pump Motor",
+        "params": {
+          "voltage": 230,
+          "efficiency": 0.85
+        },
+        "inputs": ["torque", "speed"],
+        "outputs": ["motor_current"]
+      }
+    },
+    {
+      "id": "heater-1",
+      "type": "heater",
+      "position": { "x": 400, "y": 100 },
+      "data": {
+        "label": "Printhead Heater",
+        "params": {
+          "r0": 12.0,
+          "alpha": 0.004,
+          "t0": 25.0,
+          "voltage": 230
+        },
+        "inputs": ["temperature"],
+        "outputs": ["heater_resistance", "heater_current"]
+      }
+    },
+    {
+      "id": "hydraulic-1",
+      "type": "hydraulic",
+      "position": { "x": 700, "y": 100 },
+      "data": {
+        "label": "Ink Pressure System",
+        "params": {
+          "voltage": 400,
+          "efficiency": 0.8
+        },
+        "inputs": ["pressure", "flow_rate"],
+        "outputs": ["hydraulic_current"]
+      }
+    },
+    {
+      "id": "formula-total",
+      "type": "formula",
+      "position": { "x": 400, "y": 300 },
+      "data": {
+        "label": "Total System Current",
+        "params": {
+          "expression": "motor_current + heater_current + hydraulic_current"
+        },
+        "inputs": ["motor_current", "heater_current", "hydraulic_current"],
+        "outputs": ["total_current"]
+      }
+    },
+    {
+      "id": "sweep-tension",
+      "type": "sweep",
+      "position": { "x": 400, "y": 500 },
+      "data": {
+        "label": "Tension Sweep",
+        "params": {
+          "sweep_var": "torque",
+          "output_var": "total_current",
+          "min_val": 0.5,
+          "max_val": 10.0,
+          "steps": 50
+        },
+        "inputs": ["total_current"],
+        "outputs": ["sweep_result"]
+      }
+    }
+  ],
+  "edges": [
+    { "id": "e1", "source": "motor-1", "target": "formula-total" },
+    { "id": "e2", "source": "heater-1", "target": "formula-total" },
+    { "id": "e3", "source": "hydraulic-1", "target": "formula-total" },
+    { "id": "e4", "source": "formula-total", "target": "sweep-tension" }
+  ]
+}
